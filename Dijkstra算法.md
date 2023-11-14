@@ -36,7 +36,7 @@
 
 邻接表+优先队列 实现Dijkstra算法
 
-```c++
+```cpp
 #include<iostream>
 #include<vector>
 #include<queue>
@@ -67,7 +67,7 @@ void buildGraph() {
 }
 ```
 
-```c++
+```cpp
 struct MyType {
     Vertex index;
     int dist;
