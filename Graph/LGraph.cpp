@@ -88,6 +88,38 @@ void InsertLEdge(LGraph Graph, Edge E)
 //    Graph->G[E->V2].FirstEdge = NewNode;
 }
 
+void DeleteEdge(LGraph Graph, Edge E)
+{
+    PtrToAdjVNode W, S;
+    /***************** 删除边 <V1, V2> ****************/
+    for(W = Graph->G[E->V1].FirstEdge; W; W = W->Next) {
+        if (W->AdjV == E->V2 && W == Graph->G[E->V1].FirstEdge) {
+            Graph->G[E->V1].FirstEdge = W->Next;
+            break;
+        }
+        else if (W->AdjV == E->V2 && W != Graph->G[E->V1].FirstEdge) {
+            S->Next = W->Next;
+            break;
+        }
+        S = W;
+    }
+    free(W);
+
+    /********** 若是无向图，还要删除边 <V2, V1> **********/
+//    for(W = Graph->G[E->V2].FirstEdge; W; W = W->Next) {
+//        if (W->AdjV == E->V1 && W == Graph->G[E->V2].FirstEdge) {
+//            Graph->G[E->V2].FirstEdge = W->Next;
+//            break;
+//        }
+//        else if (W->AdjV == E->V1 && W != Graph->G[E->V2].FirstEdge) {
+//            S->Next = W->Next;
+//            break;
+//        }
+//        S = W;
+//    }
+//    free(W);
+}
+
 // 建图
 LGraph BuildLGraph()
 {
@@ -136,6 +168,19 @@ void PrintLGraph(LGraph Graph)
         }
         cout << endl;
     }
+}
+
+int Degree(LGraph Graph, Vertex V){
+    int ID = 0, OD = 0;
+    PtrToAdjVNode W;
+    Vertex S;
+    for(S = 0; S < Graph->Nv; S++)
+        for(W = Graph->G[S].FirstEdge; W; W = W->Next)
+            if(W->AdjV == V)
+                ID += W->Weight;
+    for(W = Graph->G[V].FirstEdge; W; W = W->Next)
+        OD += W->Weight;
+    return ID + OD;
 }
 
 /* ********************* DFS *******************/
@@ -197,6 +242,17 @@ int main()
     LGraph Graph = BuildLGraph();
 
     cout << "创建的LGraph为: " << endl;
+    PrintLGraph(Graph);
+    cout << endl;
+
+    int TD = Degree(Graph, 2);
+    cout << "顶点2的度为： " << TD << endl;
+    cout << endl;
+
+    Edge E = (Edge)malloc(sizeof(ENode));
+    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
+    DeleteEdge(Graph, E);
+    cout << "删除边<3,4>后的LGraph为： " << endl;
     PrintLGraph(Graph);
     cout << endl;
 

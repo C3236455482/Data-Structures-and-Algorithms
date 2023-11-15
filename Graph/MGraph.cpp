@@ -63,6 +63,13 @@ void InsertMEdge(MGraph Graph, Edge E){
     //Graph->G[E->V2][E->V1] = E->Weight;
 }
 
+void DeleteEdge(MGraph Graph, Edge E){
+    // 删除<V1, V2>
+    Graph ->G[E->V1][E->V2] = INFINITY;
+    //若是无向图,还要删除<V2, V1>
+    //Graph->G[E->V2][E->V1] = INFINITY;
+}
+
 // 建图
 MGraph BuildMGraph(){
     MGraph Graph;
@@ -112,6 +119,18 @@ void PrintMGraph(MGraph G)
 bool IsMEdge(MGraph Graph, Vertex V, Vertex W)
 {
     return Graph->G[V][W] < INFINITY;
+}
+
+int Degree(MGraph Graph, Vertex V){
+    int ID = 0, OD = 0;
+    Vertex W;
+    for(W = 0; W < Graph->Nv; W++)
+        if(Graph->G[W][V] != INFINITY)
+            ID += Graph->G[W][V];
+    for(W = 0; W < Graph->Nv; W++)
+        if(Graph->G[V][W] != INFINITY)
+            OD += Graph->G[V][W];
+    return ID + OD;
 }
 
 /* ********************* DFS ****************** */
@@ -176,6 +195,17 @@ int main(){
 
     //打印图，用#来表示两个顶点没有关系
     cout << "创建的MGraph为: " << endl;
+    PrintMGraph(Graph);
+    cout << endl;
+
+    int TD = Degree(Graph, 2);
+    cout << "顶点2的度为： " << TD << endl;
+    cout << endl;
+
+    Edge E = (Edge)malloc(sizeof(ENode));
+    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
+    DeleteEdge(Graph, E);
+    cout << "删除边<3,4>后的LGraph为： " << endl;
     PrintMGraph(Graph);
     cout << endl;
 
