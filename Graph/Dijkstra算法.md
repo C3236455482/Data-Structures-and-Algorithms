@@ -38,6 +38,83 @@
 
 
 
+代码实现
+
+```cpp
+#define ERROR -1
+typedef int Vertex; // 用顶点下标表示顶点,为整形
+
+
+/* ******************************************************************************* */
+// Dijkstra 算法
+Vertex FindMinDist(MGraph Graph)
+{
+    Vertex MinV;
+    int MinDist = INFINITY;
+
+    for (int V = 0; V < Graph->Nv; V++)
+    {
+        if (!collected[V] && dist[V] < MinDist)
+        {
+            // 若 V 未被收录，且 dist[V] 更小
+            MinDist = dist[V]; // 更新最小距离
+            MinV = V; // 更新对应顶点
+        }
+    }
+    if (MinDist < INFINITY) // 若找到最小 dist
+        return MinV; // 返回对应的顶点下标
+    else return ERROR; // 若这样的顶点不存在，返回错误标记
+}
+
+//无向图的Dijkstra算法
+bool Dijkstra(MGraph Graph, Vertex S)
+{
+    Vertex V, W;
+
+    // 初始化：此处默认邻接矩阵中不存在的边用 INFINITY 表示
+    for (V = 0; V < Graph->Nv; V++)
+    {
+        dist[V] = Graph->G[S][V];
+        if (dist[V] < INFINITY)
+            path[V] = S; // 更新父节点
+        else
+            path[V] = -1; // -1 表示不存在父节点
+        collected[V] = false; // 初始时将所有点设为未收集状态
+    }
+    // 先将起点收入集合
+    dist[S] = 0;
+    collected[S] = true;
+
+    while (1)
+    {
+        // V = 未被收录顶点中 dist 最小者
+        V = FindMinDist(Graph);
+        if (V == ERROR) // 若这样的 V 不存在
+            break;
+        collected[V] = true; // 收录 V
+        // 更新新收录的 V 的邻接点
+        for (W = 0; W < Graph->Nv; W++)
+            // 若 W 是 V 的邻接点并且未被收录
+            if (!collected[W] && Graph->G[V][W] < INFINITY)
+            {
+                if (Graph->G[V][W] < 0) // 若有负边。（实际上，这种情况应该是不存在的，因为我们使用 Dijkstra 算法的前提就是假设无负权边）
+                    return false; // 不能正确解决，返回错误标记
+                // 若收录 V 使得 dist[W] 变小
+                if (dist[V] + Graph->G[V][W] < dist[W])
+                {
+                    dist[W] = dist[V] + Graph->G[V][W]; // 更新 dist[W]
+                    path[W] = V;
+                }
+            }
+    } // while 结束
+    return true; // 算法执行结束，返回正确标记
+}
+```
+
+
+
+
+
 邻接表+优先队列 实现Dijkstra算法
 
 ```cpp

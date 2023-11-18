@@ -19,15 +19,15 @@ static void init()
 }
 
 /* ********************* MGraph *******************/
-// Graph struct
-typedef struct LGNode
+// MGraph struct
+typedef struct MGNode
 {
     int Nv;
     int Ne;
     WeightType G[MaxVertexNum][MaxVertexNum];
     // DataType Data[MaxVertexNum]; // 存顶点的数据
-}* PtrToLGNode;
-typedef PtrToLGNode MGraph;
+}* PtrToMGNode;
+typedef PtrToMGNode MGraph;
 
 // Edge struct
 typedef struct ENode
@@ -42,7 +42,7 @@ MGraph CreateMGraph(int VertexNum){
     MGraph Graph;
     Vertex v,w;
 
-    Graph = (MGraph)malloc(sizeof(struct LGNode));
+    Graph = (MGraph)malloc(sizeof(struct MGNode));
     Graph->Nv = VertexNum;
     Graph->Ne = 0;
 
@@ -63,11 +63,21 @@ void InsertMEdge(MGraph Graph, Edge E){
     //Graph->G[E->V2][E->V1] = E->Weight;
 }
 
-void DeleteEdge(MGraph Graph, Edge E){
+void DeleteMEdge(MGraph Graph, Edge E){
     // 删除<V1, V2>
     Graph ->G[E->V1][E->V2] = INFINITY;
+    Graph->Ne--;
     //若是无向图,还要删除<V2, V1>
     //Graph->G[E->V2][E->V1] = INFINITY;
+}
+
+void DeleteMVertex(MGraph Graph, Vertex V){
+    for(Vertex W = 0; W < Graph->Nv; W++)
+        if(Graph->G[V][W] != INFINITY) {
+            Edge E = (Edge)malloc(sizeof(ENode));
+            E->V1 = V; E->V2 = W; E->Weight = Graph->G[V][W];
+            DeleteMEdge(Graph, E);//如果是无向图在DeleteMEdge就会被进行两次删除
+        }
 }
 
 // 建图
@@ -167,7 +177,6 @@ void DFSTraverse(MGraph Graph){
 //  邻接矩阵深度优先BFS遍
 void BFS(MGraph Graph, Vertex S)
 {
-    init();
     /* 以S为出发点对邻接矩阵存储的图Graph进行BFS搜索 */
     queue<int>Q;
     Vertex V, W;
@@ -189,6 +198,14 @@ void BFS(MGraph Graph, Vertex S)
     }
 }
 
+void BFSTraverse(MGraph Graph){
+    Vertex W;
+    init();
+    for(W = 0; W < Graph->Nv; W++)
+        if(!Visited[W])
+            BFS(Graph, W);
+}
+
 int main(){
     /*---------- 初始测试 ----------*/
     MGraph Graph = BuildMGraph();
@@ -198,14 +215,19 @@ int main(){
     PrintMGraph(Graph);
     cout << endl;
 
-    int TD = Degree(Graph, 2);
-    cout << "顶点2的度为： " << TD << endl;
-    cout << endl;
+//    int TD = Degree(Graph, 2);
+//    cout << "顶点2的度为： " << TD << endl;
+//    cout << endl;
 
-    Edge E = (Edge)malloc(sizeof(ENode));
-    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
-    DeleteEdge(Graph, E);
-    cout << "删除边<3,4>后的LGraph为： " << endl;
+//    Edge E = (Edge)malloc(sizeof(ENode));
+//    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
+//    DeleteMEdge(Graph, E);
+//    cout << "删除边<3,4>后的MGraph为： " << endl;
+//    PrintMGraph(Graph);
+//    cout << endl;
+
+    DeleteMVertex(Graph, 3);
+    cout << "删除顶点3后的MGraph为： " << endl;
     PrintMGraph(Graph);
     cout << endl;
 
@@ -214,7 +236,7 @@ int main(){
     cout << endl;
 
     cout << "MGraph的BFS遍历: " << endl;
-    BFS(Graph, 0);
+    BFSTraverse(Graph);
 
     return 0;
 }

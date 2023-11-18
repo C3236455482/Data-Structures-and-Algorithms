@@ -21,11 +21,11 @@ static void init()
 
 /* ********************* LGraph *******************/
 // 边的定义
- typedef struct ENode
- {
-     Vertex V1, V2;
-     WeightType Weight;
- }* PtrToENode;
+typedef struct ENode
+{
+    Vertex V1, V2;
+    WeightType Weight;
+}*PtrToENode;
 typedef PtrToENode Edge;
 
 // 邻接点的定义
@@ -34,10 +34,10 @@ typedef struct AdjVNode
     Vertex AdjV; // 邻接点下标
     WeightType Weight; // 边权重
     AdjVNode* Next;  // 指向下一个邻接点的致指针
-}* PtrToAdjVNode;
+}*PtrToAdjVNode;
 
 // 顶点表头结点的定义 顶点表
-struct VNode{
+struct VNode {
     PtrToAdjVNode FirstEdge;  // 边表头指针
     // DataType Data;   // 存顶点数据,一般不用
 };
@@ -48,7 +48,7 @@ typedef struct LGNode
     int Nv; //顶点数
     int Ne; // 边数
     AdjList G; // 邻接表. 是一个size为MaxVertexNum的数组,每一个元素都是一个结点VNode
-}* PtrToLGNode;
+}*PtrToLGNode;
 typedef PtrToLGNode LGraph;
 
 // 初始化有VertexNum个顶点但没有边的图
@@ -61,7 +61,7 @@ LGraph CreateLGraph(int VertexNum)
     Graph->Nv = VertexNum;
     Graph->Ne = 0;
 
-    for(v=0; v<Graph->Nv; v++)
+    for (v = 0; v < Graph->Nv; v++)
         Graph->G[v].FirstEdge = nullptr; // 每一个顶点v的FirstEdge都是空的, 编号从0到 Graph->Nv-1
 
     return Graph;
@@ -69,7 +69,7 @@ LGraph CreateLGraph(int VertexNum)
 
 void InsertLEdge(LGraph Graph, Edge E)
 {
-    auto NewNode = (PtrToAdjVNode) malloc(sizeof(struct AdjVNode));
+    auto NewNode = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
     /***************** 插入边 <V1, V2> ****************/
     /* 为V2建立新的邻接点 */
     NewNode->AdjV = E->V2;
@@ -88,11 +88,11 @@ void InsertLEdge(LGraph Graph, Edge E)
 //    Graph->G[E->V2].FirstEdge = NewNode;
 }
 
-void DeleteEdge(LGraph Graph, Edge E)
+void DeleteLEdge(LGraph Graph, Edge E)
 {
-    PtrToAdjVNode W, S;
+    PtrToAdjVNode W, S = nullptr;
     /***************** 删除边 <V1, V2> ****************/
-    for(W = Graph->G[E->V1].FirstEdge; W; W = W->Next) {
+    for (W = Graph->G[E->V1].FirstEdge; W; W = W->Next, S = W) {
         if (W->AdjV == E->V2 && W == Graph->G[E->V1].FirstEdge) {
             Graph->G[E->V1].FirstEdge = W->Next;
             break;
@@ -101,8 +101,8 @@ void DeleteEdge(LGraph Graph, Edge E)
             S->Next = W->Next;
             break;
         }
-        S = W;
     }
+    Graph->Ne--;
     free(W);
 
     /********** 若是无向图，还要删除边 <V2, V1> **********/
@@ -120,6 +120,16 @@ void DeleteEdge(LGraph Graph, Edge E)
 //    free(W);
 }
 
+void DeleteLVertex(LGraph Graph, Vertex V) {
+    PtrToAdjVNode W;
+    for (W = Graph->G[V].FirstEdge; W; W = Graph->G[V].FirstEdge) {
+        Edge E = (Edge)malloc(sizeof(ENode));
+        E->V1 = V; E->V2 = W->AdjV; E->Weight = W->Weight;
+        DeleteLEdge(Graph, E);//如果是无向图在DeleteLEdge就会被进行两次删除
+        free(E);
+    }
+}
+
 // 建图
 LGraph BuildLGraph()
 {
@@ -134,7 +144,7 @@ LGraph BuildLGraph()
     cin >> Graph->Ne;   // 读入边数
     if (Graph->Ne != 0)
     { // 如果有边
-        E = (Edge) malloc(sizeof(struct ENode));
+        E = (Edge)malloc(sizeof(struct ENode));
         // 读入边, 格式为 "起点, 终点, 权重", 插入邻接表
         for (i = 0; i < Graph->Ne; i++)
         {
@@ -157,7 +167,7 @@ void PrintLGraph(LGraph Graph)
     if (!Graph->G[0].FirstEdge) // 邻接表为空
         return;
     int i;
-    for (i = 0; i < Graph->Nv; i++){
+    for (i = 0; i < Graph->Nv; i++) {
         cout << i << ": | ";
 
         PtrToAdjVNode tmp = Graph->G[i].FirstEdge;
@@ -170,15 +180,15 @@ void PrintLGraph(LGraph Graph)
     }
 }
 
-int Degree(LGraph Graph, Vertex V){
+int Degree(LGraph Graph, Vertex V) {
     int ID = 0, OD = 0;
     PtrToAdjVNode W;
     Vertex S;
-    for(S = 0; S < Graph->Nv; S++)
-        for(W = Graph->G[S].FirstEdge; W; W = W->Next)
-            if(W->AdjV == V)
+    for (S = 0; S < Graph->Nv; S++)
+        for (W = Graph->G[S].FirstEdge; W; W = W->Next)
+            if (W->AdjV == V)
                 ID += W->Weight;
-    for(W = Graph->G[V].FirstEdge; W; W = W->Next)
+    for (W = Graph->G[V].FirstEdge; W; W = W->Next)
         OD += W->Weight;
     return ID + OD;
 }
@@ -202,11 +212,11 @@ void DFS(LGraph Graph, Vertex V)
             DFS(Graph, W->AdjV);
 }
 
-void DFSTraverse(LGraph Graph){
+void DFSTraverse(LGraph Graph) {
     Vertex W;
     init();
-    for(W = 0; W < Graph->Nv; W++)
-        if(!Visited[W])
+    for (W = 0; W < Graph->Nv; W++)
+        if (!Visited[W])
             DFS(Graph, W);
 }
 
@@ -214,7 +224,6 @@ void DFSTraverse(LGraph Graph){
 // // 邻接矩阵深度优先BFS遍
 void BFS(LGraph Graph, Vertex S)
 {   /* 以S为出发点对邻接矩阵存储的图Graph进行BFS搜索 */
-    init();
     Vertex V;
     PtrToAdjVNode W;
 
@@ -236,6 +245,14 @@ void BFS(LGraph Graph, Vertex S)
     } /* while结束*/
 }
 
+void BFSTraverse(LGraph Graph) {
+    Vertex W;
+    init();
+    for (W = 0; W < Graph->Nv; W++)
+        if (!Visited[W])
+            BFS(Graph, W);
+}
+
 
 int main()
 {
@@ -245,14 +262,19 @@ int main()
     PrintLGraph(Graph);
     cout << endl;
 
-    int TD = Degree(Graph, 2);
-    cout << "顶点2的度为： " << TD << endl;
-    cout << endl;
+//    int TD = Degree(Graph, 2);
+//    cout << "顶点2的度为： " << TD << endl;
+//    cout << endl;
 
-    Edge E = (Edge)malloc(sizeof(ENode));
-    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
-    DeleteEdge(Graph, E);
-    cout << "删除边<3,4>后的LGraph为： " << endl;
+//    Edge E = (Edge)malloc(sizeof(ENode));
+//    E->V1 = 3;  E->V2 = 4; E->Weight = 8;
+//    DeleteLEdge(Graph, E);
+//    cout << "删除边<3,4>后的LGraph为： " << endl;
+//    PrintLGraph(Graph);
+//    cout << endl;
+
+    DeleteLVertex(Graph, 3);
+    cout << "删除顶点3后的LGraph为： " << endl;
     PrintLGraph(Graph);
     cout << endl;
 
@@ -261,7 +283,7 @@ int main()
     cout << endl;
 
     cout << "LGraph的BFS遍历: " << endl;
-    BFS(Graph, 0);
+    BFSTraverse(Graph);
 
 
     return 0;
